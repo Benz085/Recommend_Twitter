@@ -1,0 +1,82 @@
+# Protect the htaccess file
+ <Files .htaccess>
+ 	Order Allow,Deny
+ 	Deny from all
+ </Files>
+
+
+# Disable directory browsing
+Options All -Indexes
+
+ # BEGIN COMPRESSION AND CACHING
+ <IfModule mod_deflate.c>
+ 	# Enable compression
+ 	AddOutputFilterByType DEFLATE text/css text/javascript application/x-javascript text/html text/plain text/xml image/x-icon
+ 	<IfModule mod_setenvif.c>
+ 		BrowserMatch ^Mozilla/4 gzip-only-text/html
+ 		BrowserMatch ^Mozilla/4\.0[678] no-gzip
+ 		BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+ 		BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
+ 	</IfModule>
+ 	<IfModule mod_headers.c>
+ 		# Make sure proxies deliver correct content
+ 		Header append Vary User-Agent env=!dont-vary
+ 		# Ensure proxies deliver compressed content correctly
+ 		Header append Vary Accept-Encoding
+ 	</IfModule>
+ </IfModule>
+
+ <IfModule mod_headers.c>
+ 	# No ETags, No Pragma
+ 	Header unset Pragma
+ 	Header unset ETag
+ 	# Default cache time to 1 year (31536000 sec)
+ 	Header set Cache-Control "max-age=31536000, public, must-revalidate"
+ </IfModule>
+
+# No ETags
+FileETag none
+
+ # CACHE SETTINGS (mod_expires)
+ <IfModule mod_expires.c>
+ 	# Turn on Expires
+ 	ExpiresActive On
+ 	# set default to "access plus 1 year"
+ 	ExpiresDefault A31536000
+ 	# html - "modification plus 1 hour"
+ 	ExpiresByType text/html M3600
+ 	# css and JavaScript - "modification plus 6 weeks"
+ 	ExpiresByType text/css M3628800
+ 	ExpiresByType text/javascript M3628800
+ 	ExpiresByType application/x-javascript M3628800
+ </IfModule>
+
+ # No cache for php-files
+ <FilesMatch "\.(php)$">
+ 	<IfModule mod_expires.c>
+ 		ExpiresActive Off
+ 	</IfModule>
+ 	<IfModule mod_headers.c>
+ 		Header set Cache-Control "private, no-cache, no-store, proxy-revalidate, no-transform"
+ 	</IfModule>
+ </FilesMatch>
+
+ 
+PHP_VALUE mbstring.internal_encoding UTF-8
+PHP_VALUE mbstring.http_output UTF-8
+PHP_VALUE mbstring.encoding_translation On
+PHP_VALUE mbstring.detect_order UTF-8
+PHP_VALUE mbstring.func_overload 7
+ 
+
+<IfModule mod_rewrite.c>
+   RewriteEngine On
+   RewriteCond %{REQUEST_FILENAME} !-d
+   RewriteCond %{REQUEST_FILENAME} !-f
+   RewriteRule ^(.*)$ index.php/$1 [QSA,L]
+</IfModule>
+
+
+
+
+
